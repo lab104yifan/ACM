@@ -1,0 +1,131 @@
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+#define lson(x) ((x<<1) + 1)
+#define rson(x) ((x<<1) + 2)
+#define INF 0x3f3f3f3f
+
+const int N = 1000005;
+int r, c, m;
+
+struct Node {
+    int l, r, sum, Max, Min, add, set;
+} node[4 * N];
+
+void build(Node *node, int l, int r, int x) {
+    node[x].l = l; node[x].r = r;
+    if (l == r) {
+	node[x].sum = 0;
+	node[x].Max = 0;
+	node[x].Min = INF;
+	node[x].add = 0;
+	node[x].set = 0;
+	return;
+    }
+    int mid = (l + r) / 2;
+    build(node, l, mid, lson(x));
+    build(node, mid + 1, r, rson(x));
+}
+
+void pushdown(Node *node, int x) {
+    if (node[x].set)
+	node[lson(x)].sum = node[rson(x)].sum = 0;
+    node[lson(x)].set = node[rson(x)].set = node[x].set;
+    node[lson(x)].sum += node[x].sum;
+    node[rson(x)].sum += node[x].sum;
+    node[x].set = node[x].sum = 0;
+}
+
+void pushup(Node *node, int x) {
+    node[x].sum = node[lson(x)].sum + node[rson(x)].sum;
+    node[x].Max = max(node[lson(x)].Max, node[rson(x)].Max);
+    node[x].Min = max(node[lson(x)].Min, node[lson(x)].Min);
+}
+
+void add(Node *node, int l, int r, int v, int x) {
+    if (node[x].l >= l && node[x].r <= r) {
+	node[x].add += v;
+	return;
+    }
+    pushdown(node, x);
+    int mid = (node[x].l + node[x].r) / 2;
+    if (l <= mid) add(node, l, r, v, lson(x));
+    if (r > mid) add(node, l, r, v, rson(x));
+    pushup(node, x);
+}
+
+void set(Node *node, int l, int r, int v, int x) {
+    if (node[x].l >= l && node[x].r <= r) {
+	node[x].set = v;
+	node[x].add = 0;
+	return;
+    }
+    pushdown(node, x);
+    int mid = (node[x].l + node[x].r) / 2;
+    if (l <= mid) set(node, l, r, v, lson(x));
+    if (r > mid) set(node, l, r, v, rson(x));
+    pushup(node, x);
+}
+
+Node query(Node *node, int l, int r, int x) {
+    if (node[x].l >= l && node[x].r <= r && node[x].set == 0 && node[x].add == 0)
+	return node[x];
+    if (node[x].l == node[x].r) {
+	int tmp = node[x].set + node[x].add;
+	node[x].sum = node[x].Max = node[x].Min = tmp;
+	node[x].set = node[x].add = 0;
+	return node[x];
+    }
+    int mid = (node[x].l + node[x].r) / 2;
+    pushdown(node, x);
+    Node ans;
+    ans.sum = 0; ans.Max = 0; ans.Min = INF;
+    if (l <= mid) {
+	Node left = query(node, l, r, lson(x));
+	ans.sum += left.sum;
+	ans.Max = max(ans.Max, left.Max);
+	ans.Min = min(ans.Min, left.Min);
+    }
+    if (r > mid) {
+	Node right = query(node, l, r, rson(x));
+	ans.sum += right.sum;
+	ans.Max = max(ans.Max, right.Max);
+	ans.Min = min(ans.Min, right.Min);
+    }
+    pushup(node, x);
+    return ans;
+}
+
+int main() {
+    while (~scanf("%d%d%d", &r, &c, &m)) {
+	for (int i = 0; i < r; i++)
+	    build(node + 4 * i, 1, c, 0);
+	int q, x1, y1, x2, y2, v;
+	while (m--) {
+	    scanf("%d", &q);
+	    if (q == 3) {
+		scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+		x1--; x2--;
+		int sum = 0, Max = 0, Min = INF;
+		for (int i = x1; i <= x2; i++) {
+		    Node tmp = query(node + 4 * i, y1, y2, 0);
+		    sum += tmp.sum;
+		    Max = max(Max, tmp.Max);
+		    Min = min(Min, tmp.Min);
+		}
+		printf("%d %d %d\n", sum, Max, Min);
+	    }
+	    else {
+		scanf("%d%d%d%d%d", &x1, &y1, &x2, &y2, &v);
+		x1--; x2--;
+		for (int i = x1; i <= x2; i++) {
+		    if (q == 1) add(node + 4 * i, y1, y2, v, 0);
+		    else set(node + 4 * i, y1, y2, v, 0);
+		}
+	    }
+	}
+    }
+    return 0;
+}

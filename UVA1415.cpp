@@ -6,14 +6,8 @@ const int N = 20005;
 int t, a, b, prime[N], pn = 0, vis[N];
 
 bool judge() {
-    if (a == 0) {
-	int m = sqrt(m);
-	for (int i = 0; i <= m; i++) {
-	    double t = sqrt((b - i * i) * 1.0 / 2);
-	    if (ceil(t) == floor(t)) return true;
-	}
+    if (a == 0)
 	return false;
-    }
     int tmp = a * a + 2 * b * b;
     for (int i = 0; i < pn && prime[i] < tmp; i++)
 	if (tmp % prime[i] == 0) return false;

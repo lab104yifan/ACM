@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+#define max(a,b) ((a)>(b)?(a):(b))
+const int N = 200005;
+
+int n, m, bit[N], num[N];
+
+void add(int x, int v) {
+	num[x] = v;
+	while (x <= n) {
+		bit[x] = max(bit[x], v);
+		x += (x&(-x));
+	}
+}
+
+int get(int l, int r) {
+	int ans = num[r];
+	while (l != r) {
+		for (r -= 1; r - (r&(-r)) >= l; r -= (r&(-r)))
+			ans = max(ans, bit[r]);
+		ans = max(ans, num[r]);
+	}
+	return ans;
+}
+
+void init() {
+	memset(bit, 0, sizeof(bit));
+	for (int i = 1; i <= n; i++) {
+		scanf("%d", &num[i]);
+		add(i, num[i]);
+	}
+}
+
+void solve() {
+	char s[10];
+	int a, b;
+	while (m--) {
+		scanf("%s%d%d", s, &a, &b);
+		if (s[0] == 'U') add(a, b);
+		else printf("%d\n", get(a, b));
+	}
+}
+
+int main() {
+	while (~scanf("%d%d", &n, &m)) {
+		init();
+		solve();
+	}
+	return 0;
+}

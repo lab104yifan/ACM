@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <set>
+using namespace std;
+
+long long x, n, r;
+set<long long> ans;
+
+long long exgcd(long long a, long long b, long long &x, long long &y) {
+    if (!b) {x = 1; y = 0; return a;}
+    long long d = exgcd(b, a % b, y, x);
+    y -= a / b * x;
+    return d;
+}
+
+/*
+void mod_line(long long a, long long b, long long c) {
+    long long x, y;
+    long long d = exgcd(a, c, x, y);
+    if (b % d) return;
+    x = x * (b / d) % c;
+      for (long long i = 0; i < d; i++) {
+      long long cal = ((x * a - r) % n + n) % n;
+      if (cal >= 0)
+      ans.insert(cal);
+      x = (x + (c / d) * i) % c;
+      }
+    x = x * b / d;
+    x = (x % (c / d) + c / d) % (c / d);
+    long long t = a * x - b / 2;
+    long long lcm = a / d * c;
+    for (; t < n; t += lcm)
+	if (t >= 0 && t * t % n == x) ans.insert(t);
+}
+*/
+
+
+int main() {
+    int cas = 0;
+    while (~scanf("%lld%lld%lld", &x, &n, &r) && n) {
+	ans.clear();
+	long long m = (long long)sqrt(n);
+	for (long long i = 1; i <= m; i++) {
+	    if (n % i) continue;
+	    mod_line(i, 2 * r, n / i);
+	    mod_line(n / i, 2 * r, i);
+	}
+	printf("Case %d:", ++cas);
+	for (set<long long>::iterator it = ans.begin(); it != ans.end(); it++)
+	    printf(" %lld", *it);
+	printf("\n");
+    }
+    return 0;
+}
