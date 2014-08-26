@@ -1,0 +1,205 @@
+#include <cstdio>
+#include <cstring>
+
+#include <vector>
+#include <algorithm>
+#include <set>
+using namespace std;
+#define INF 999999999.9
+#define PI acos(-1.0)
+#define ll int
+const int MAX_N = 507;
+const double eps = 1e-6;
+
+struct Point {
+    int x, y, v;
+    int id;
+    Point () {}
+    Point (int _x, int _y, int _v, int _id) {
+        x = x, y = _y, v = _v, id = _id;
+    }
+    bool operator < (const Point &rhs) const {
+        if (x != rhs.x) return x < rhs.x;
+        return y < rhs.y;
+    }
+};
+
+int v[MAX_N];
+bool vis[MAX_N];
+int n, top;
+int ans[MAX_N];
+Point P[MAX_N], p1[MAX_N];
+
+double cross(Point a, Point b, Point c) {
+    return (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y);
+}
+
+bool cmp(Point a, Point b) {
+   if (a.y == b.y) return a.x < b.x;
+   return a.y < b.y;
+}
+void graham() {
+    sort(p1, p1 + n, cmp);
+    top = 1;
+    for (int i = 0; i < 2; i++) v[i] = i;
+    for (int i = 2; i < n; i++) {
+       while (top > 0 && cross(p1[i], p1[v[top]], p1[v[top - 1]]) > 0) top--;
+       v[++top] = i;
+    }
+    int len = top;
+    v[++top] = n - 2;
+    for (int i = n - 3; i >= 0; i--) {
+        while (top > len && cross(p1[i], p1[v[top]], p1[v[top - 1]]) > 0) top--;
+        v[++top] = i;
+    }
+}
+
+void Clear() {
+    memset(ans, 0, sizeof ans);
+    memset(p1, 0, sizeof p1);
+    memset(P, 0, sizeof P);
+    memset(v, 0, sizeof v);
+    memset(vis, 0, sizeof vis);
+}
+const int N = 505;
+
+struct E {
+    int x, y, v, id, ok;
+}s[N];
+vector<E> G;
+bool cmp1(const E a, const E b) {
+    if(a.v != b.v) return a.v > b.v;
+    if(a.x != b.x) return a.x < b.x;
+    if(a.y != b.y) return a.y < b.y;
+    return a.id < b.id;
+}
+int nn;
+void put(int ttop){
+    for(int i = 1; i <= nn; i ++) printf("%d", ans[i]);
+    puts("");
+}
+
+int main() {
+    int cas = 0;
+    while(~scanf("%d", &nn), nn) {
+		Clear();
+        printf("Case #%d: ", ++cas);
+        memset(ans, 0, sizeof ans);
+        for(int i = 0; i < nn; i ++) {
+            scanf("%d%d%d", &s[i].x, &s[i].y, &s[i].v);
+            s[i].id = i+1;
+            s[i].ok = 1;
+            for(int j = 0; j < i; j++)
+                if(s[i].x==s[j].x && s[i].y==s[j].y && s[i].v==s[j].v)
+                {
+                    s[i].ok = 0;
+                    break;
+                }
+        }
+        sort(s, s + nn, cmp1);
+		if(s[0].v==0){put(12);continue;}
+        int ttop = 0;
+        while(ttop < nn && s[ttop].v == s[0].v) ttop ++;
+        //----------------------------
+        G.clear();
+        for(int i = 0; i < ttop; i++)if( s[i].ok ) G.push_back(s[i]);
+        bool gongxian = true;
+        int x = 0, y = 0;
+        for(int i = 1; i < ttop; i++)
+        {
+            if(s[i].x == s[i-1].x && s[i].y == s[i-1].y)continue;
+            if(x==0&&y==0) {
+                x = s[i].x-s[i-1].x;
+                y = s[i].y - s[i-1].y;
+            }
+            else if(s[i].x - s[i-1].x != x || s[i].y - s[i-1].y != y)
+            {
+                gongxian =false;
+                break;
+            }
+        }
+        if(G.size()<=2 || gongxian) {
+            for(int i = 0; i < G.size(); i++)
+            {
+                bool ok = true;
+                for(int j = 0; ok && j < ttop; j++)
+                    if(G[i].id != s[j].id && G[i].x==s[j].x && G[i].y==s[j].y)
+                        ok = false;
+                ans[G[i].id] = ok;
+            }
+            put(ttop); continue;
+        }
+        for(int i = 0; i < G.size(); i++)
+        {
+            p1[i].x = G[i].x;
+            p1[i].y = G[i].y;
+            p1[i].id = G[i].id;
+        }
+		n = G.size();
+		graham();
+        for(int i = 0; i <= top; i++)
+        {
+            bool ok = true;
+            for(int j = 0; ok && j < ttop; j++)
+            {
+                if(p1[v[i]].id != s[j].id && p1[v[i]].x==s[j].x && p1[v[i]].y==s[j].y)
+                    ok = false;
+            }
+            ans[p1[v[i]].id] = ok;
+        }
+        put(ttop);
+    }
+    return 0;
+}
+/*
+9
+0 0 1
+0 0 1
+0 10 1
+0 10 1
+10 0 1
+10 0 1
+10 10 1
+10 10 1
+5 5 1
+
+10
+0 0 1
+0 0 1
+0 10 1
+0 10 1
+10 0 1
+10 0 1
+10 10 1
+10 10 1
+5 5 1
+5 5 1
+
+4
+0 0 1
+1 0 1
+2 0 1
+1 1 1
+
+1
+0 0 0
+
+6
+0 0 1
+-1 0 1
+1 0 1
+0 1 1
+0 -1 1
+0 -1 1
+
+6
+0 0 1
+-1 0 1
+1 0 1
+0 1 1
+0 -1 1
+0 -1 1
+
+*/
+
+

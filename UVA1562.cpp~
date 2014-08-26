@@ -1,0 +1,93 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+const double eps = 1e-9;
+
+int t, n, m, hash[1005];
+char str[205];
+
+double A[15][15];
+
+void build() {
+    n = 0, m = 0;
+    int flag = 1;
+    memset(hash, -1, sizeof(hash));
+    memset(A, 0, sizeof(A));
+    int len = strlen(str), i = 0;
+    while (i <= len) {
+	if (str[i] >= 'A' && str[i] <= 'Z') {
+	    int idx = str[i] - 'A';
+	    i++;
+	    if (str[i] >= 'a' && str[i] <= 'z') {
+		idx = idx * 26 + str[i] - 'a';
+		i++;
+	    }
+	    if (hash[idx] == -1) 
+		hash[idx] = n++;
+	    if (str[i] >= '0' && str[i] <= '9') {
+		A[hash[idx]][m] += flag * (str[i] - '0');
+		i++;
+	    }
+	    else {
+		A[hash[idx]][m] += flag;
+	    }
+	}
+	if (str[i] == '=') flag = -1;
+	if (str[i] == '+' || str[i] == '=' || str[i] == '\0') {
+	    i++; m++;
+	}
+    }
+}
+
+bool gauss() {
+    int i = 0, j = 0;
+    while (i < n && j < m) {
+	int r;
+	for (r = i; r < n; r++)
+	    if (fabs(A[r][j]) >= eps) break;
+	if (r == n) {
+	    j++;
+	    continue;
+	}
+	for (int k = j; k <= m; k++) swap(A[i][k], A[r][k]);
+	for (int k = 0; k < n; k++) {
+	    if (i == k) continue;
+	    if (fabs(A[k][j]) >= eps) {
+		double tmp = A[k][j] / A[i][j];
+		for (int x = j; x <= m; x++) {
+		    A[k][x] -= tmp * A[i][x];
+		}
+	    }
+	}
+	i++;
+    }
+    for (int k = i; k < n; k++)
+	if (fabs(A[k][m]) >= eps) return false;
+    for (int k = m - 1; k >= 0; k--) {
+	if (fabs(A[k][k]) < eps) {
+	    A[k][k] = A[k][m] = 1;
+	    for (int j = k - 1; j >= 0; j--) {
+		A[j][m] -= A[j][k];
+		A[j][k] = 0;
+	    }
+	}
+    }
+    for (int k = 0; k < i; k++)
+	if (fabs(A[k][m]) < eps) return false;
+    for (int k = 0; k < m; k++)
+	printf("%.02lf%c", A[k][m] / A[k][k], k == m - 1 ? '\n' : ' ');
+    return true;
+}
+
+int main() {
+    scanf("%d", &t);
+    while (t--) {
+	scanf("%s", str);
+	build();
+	if (!gauss()) printf("IMPOSSIBLE\n");
+    }
+    return 0;
+}

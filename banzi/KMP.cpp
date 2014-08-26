@@ -19,6 +19,16 @@ struct KMP {
 	}
     }
 
+    void getnext2(char *str) {
+	next[0] = -1;
+	int j = -1;
+	for (int i = 1; i < n; i++) {
+	    while (j >= 0 && str[i] != str[j + 1]) j = next[j];
+	    if (str[i] == str[j + 1]) j++;
+	    next[i] = j;
+	}
+    }
+
     void find(char *T, char *P) {
 	int n = strlen(T), m = strlen(P), j = 0;
 	getnext(P);

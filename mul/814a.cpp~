@@ -1,0 +1,69 @@
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N = 505;
+
+int n, pn, vis[N];
+struct Point {
+    int x, y, val, id;
+} save[N], p[N];
+
+bool cmpx(Point a, Point b) {
+    return a.x < b.x;
+}
+
+bool cmpy(Point a, Point b) {
+    return a.y < b.y;
+}
+
+void solve() {
+    sort(p, p + pn, cmpx);
+    vis[p[0].id] = 1;
+    vis[p[pn - 1].id] = 1;
+    for (int i = 1; i < pn; i++) {
+	if (p[i].x != p[i - 1].x) break;
+	vis[p[i].id] = 1;
+    }
+    for (int i = pn - 2; i >= 0; i--) {
+	if (p[i].x != p[i + 1].x) break;
+	vis[p[i].id] = 1;
+    }
+    sort(p, p + pn, cmpy);
+    vis[p[0].id] = 1;
+    vis[p[pn - 1].id] = 1;
+    for (int i = 1; i < pn; i++) {
+	if (p[i].y != p[i - 1].y) break;
+	vis[p[i].id] = 1;
+    }
+    for (int i = pn - 2; i >= 0; i--) {
+	if (p[i].y != p[i + 1].y) break;
+	vis[p[i].id] = 1;
+    }
+}
+
+int main() {
+    int cas = 0;
+    while (~scanf("%d", &n) && n) {
+	memset(vis, 0, sizeof(vis));
+	int Max = 0;
+	for (int i = 0; i < n; i++) {
+	    scanf("%d%d%d", &save[i].x, &save[i].y, &save[i].val);
+	    save[i].id = i;
+	    Max = max(Max, save[i].val);
+	}
+	pn = 0;
+	for (int i = 0; i < n; i++) {
+	    if (save[i].val == Max) {
+		p[pn++] = save[i];
+	    }
+	}
+	solve();
+	printf("Case #%d: ", ++cas);
+	for (int i = 0; i < n; i++)
+	    printf("%d", vis[i]);
+	printf("\n");
+    }
+    return 0;
+}

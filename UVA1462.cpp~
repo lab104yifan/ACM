@@ -1,0 +1,10 @@
+#include <cstdio>
+#include <cstring>
+
+int n;
+char str[15];
+
+int main() {
+
+    return 0;
+}

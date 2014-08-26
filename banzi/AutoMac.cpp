@@ -10,22 +10,22 @@ const int MAXNODE = 11000;
 const int SIGMA_SIZE = 26;
 
 struct AutoMac {
-
+    
     int ch[MAXNODE][SIGMA_SIZE];
     int val[MAXNODE];
     int next[MAXNODE];
     int last[MAXNODE];
     int sz;
-
+    
     void init() {
 	sz = 1; 
 	memset(ch[0], 0, sizeof(ch[0]));
     }
-    
+
     int idx(char c) {
 	return c - 'a';
     }
-    
+
     void insert(char *str, int v) {
 	int n = strlen(str);
 	int u = 0;
@@ -48,6 +48,7 @@ struct AutoMac {
 	    int u = ch[0][c];
 	    if (u) {next[u] = 0; Q.push(u); last[u] = 0;}
 	}
+
 	while (!Q.empty()) {
 	    int r = Q.front(); Q.pop();
 	    for (int c = 0; c < SIGMA_SIZE; c++) {

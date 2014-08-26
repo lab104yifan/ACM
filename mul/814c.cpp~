@@ -1,0 +1,80 @@
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll;
+const int MOD = 998244353;
+const int N = 2049;
+
+int n, num, cnt[N], have[N], hn, invv[100005], dp[2][N], mi[100005];
+
+void init() {
+    memset(cnt, 0, sizeof(cnt));
+    hn = 0;
+    for (int i = 0; i < n; i++) {
+	scanf("%d", &num);
+	if (cnt[num] == 0) have[hn++] = num;
+	cnt[num]++;
+    }
+}
+
+inline int inv(int x) {
+    int k = MOD - 2;
+    int ans = 1;
+    while (k) {
+	if (k&1) ans = (ll)ans * x % MOD;
+	x = (ll)x * x % MOD;
+	k >>= 1;
+    }
+    return ans;
+}
+
+inline int cal(int r, int ss) {
+    int ans = (mi[r] - ss) % MOD;
+    if (ans < 0) ans + MOD;
+    return ans;
+} 
+
+int solve() {
+    int pre = 1, now = 0;
+    memset(dp[0], 0, sizeof(dp[0]));
+    dp[0][0] = 1;
+    for (int i = 0; i < hn; i++) {
+	swap(pre, now);
+	memset(dp[now], 0, sizeof(dp[now]));
+	for (int j = 0; j <= 2048; j++) {
+	    if (dp[pre][j] == 0) continue;
+	    int C = 1;
+	    int ss = 0;
+	    int sum = j;
+	    for (int k = 0; k <= cnt[have[i]]; k++) {
+		if (sum >= 2048) {
+		    dp[now][2048] = ((ll)dp[pre][j] * cal(cnt[have[i]], ss) + dp[now][2048]) % MOD;
+		    break;
+		}
+		dp[now][sum] = ((ll)dp[pre][j] * C + dp[now][sum]) % MOD;
+		sum += have[i];
+		ss = (ss + C) % MOD;
+		C = (ll)C * (cnt[have[i]] - k) % MOD * invv[k + 1] % MOD;
+	    }
+	}
+    }
+    return dp[now][2048];
+}
+
+int main() {
+    mi[0] = 1;
+    for (int i = 1; i <= 100000; i++) {
+	invv[i] = inv(i);
+	mi[i] = mi[i - 1] * 2;
+	if (mi[i] >= MOD)
+	    mi[i] -= MOD;
+    }
+    int cas = 0;
+    while (~scanf("%d", &n) && n) {
+	init();
+	printf("Case #%d: %d\n", ++cas, solve());
+    }
+    return 0;
+}

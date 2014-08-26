@@ -1,0 +1,73 @@
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+typedef unsigned long long ull;
+
+const ull x = 123;
+const int N = 40005;
+
+int m, n;
+char str[N];
+ull H[N], Hp[N];
+
+void gethash() {
+    H[n] = 0;
+    for (int i = n - 1; i >= 0; i--)
+	H[i] = H[i + 1] * x + str[i] - 'a';
+}
+
+struct Suf {
+    int hash, id;
+} suf[N];
+
+bool cmp(Suf a, Suf b) {
+    if (a.hash == b.hash) return a.id < b.id;
+    return a.hash < b.hash;
+}
+
+int find(int L) {
+    for (int i = 0; i < n - L + 1; i++) {
+	suf[i].hash = H[i] - H[i + L] * Hp[L];
+	suf[i].id = i;
+    }
+    sort(suf, suf + n - L + 1, cmp);
+    int ans = -1;
+    for (int i = 0; i < n - L + 1; i++) {
+	int j, len = 0;
+	for (j = i; suf[i].hash == suf[j].hash && j < n - L + 1; j++)
+	    len++;
+	if (len >= m) {
+	    ans = max(ans, suf[j - 1].id);
+	}
+	i = j - 1;
+    }
+    return ans;
+}
+
+void solve() {
+    if (find(1) == -1) printf("none\n");
+    else {
+	int l = 1, r = n - m + 2;
+	while (l < r) {
+	    int mid = (l + r) / 2;
+	    if (find(mid) == -1) r = mid;
+	    else l = mid + 1;
+	}
+	printf("%d %d\n", l - 1, find(l - 1));
+    }
+}
+
+int main() {
+    Hp[0] = 1;
+    for (int i = 1; i < N; i++)
+	Hp[i] = Hp[i - 1] * x;
+    while (~scanf("%d", &m) && m) {
+	scanf("%s", str);
+	n = strlen(str);
+	gethash();
+	solve();
+    }
+    return 0;
+}

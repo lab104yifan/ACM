@@ -13,8 +13,10 @@ int main() {
     while (t--) {
 	scanf("%d%d%lld", &n, &k, &l);
 	int s = (1<<k);
-	ll yu = l - k;
-	l = k;
+	if (l > k) {
+	    ll yu = l - k;
+	    l = k;
+	}
 	memset(dp, 0, sizeof(dp));
 	dp[0] = 1;
 	while (n--) {

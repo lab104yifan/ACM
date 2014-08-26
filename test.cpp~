@@ -1,72 +1,84 @@
-#include <stdio.h>
-#include <string.h>
-#include <algorithm>
-#include <vector>
-#include <ctype.h>
-#include <stack>
-#include <iostream>
-#define sigma_size 26
+#include<iostream>
+#include<cstdio>
+#include<map>
+#include<string.h>
 using namespace std;
-const int Max =4000*1000+10;
-int son[Max];
-int bro[Max];
-char ch[Max];
-int val[Max];
-int flag[Max];
-int cnt;
-long long ans;
-void insert(const char *s)
-{
-    ans+=val[0];
-    val[0]++;
-    int i,n=strlen(s);
-    int u=0;
-    int v;
-    for(i=0;i<n;i++)
-    {
-        bool found=false;
-        for(v=son[u];v!=0;v=bro[v])
-            if(ch[v]==s[i])
-             {
-                 found=true;
-                 break;
-             }
-        if(!found)
-        {
-            v=cnt++;
-            val[v]=0;
-            flag[v]=0;
-            ch[v]=s[i];
-            bro[v]=son[u];
-            son[u]=v;
-            son[v]=0;
-        }
-        u=v;
-        ans+=val[u]*2;
-        val[u]++;
-    }
-    if(flag[v])ans+=flag[v];//这个是用于统计相同字符串的个数 开始没有这个一直WA 比如3 个a 那么要比较 6次
-    flag[v]++;
-    //ans=temp;
-}
-char str[1010];
 
-int main()
-{
-   //  freopen("in.txt","r",stdin);
-    int n,num=1;
-    while(scanf("%d",&n),n)
-    {
-        ans=0;
-        cnt=1;
-        val[0]=0;
-        son[0]=bro[0]=0;
-        while(n--)
-        {
-            scanf("%s",str);
-            insert(str);
-        }
-        printf("Case %d: %lld\n",num++,ans);
+#define MAXN 3000001
+
+int ways[MAXN],child[MAXN][26],gone[MAXN];
+char buff[20];
+
+int change(char ch) {
+    return ch-'a';
+}
+
+void Trie(int n) {
+    int C=1;
+    memset(ways,0,sizeof(ways));
+    memset(child,0,sizeof(child));
+    for (int i=0;i<n;i++) {
+	scanf("%s",buff);
+	int len=strlen(buff),p=1;
+	for (int i=0;i<len;i++){
+	    int ch=change(buff[i]);
+	    if (!child[p][ch])
+		child[p][ch]=++C;
+	    p=child[p][ch];
+	    ways[p]++;
+	}
+    }
+}
+
+void dfs(int step,int len,int th,int no) {
+    //	cout<<no<<' '<<buff[step]<<' '<<ways[no]<<endl;
+    if (step==len) {
+	gone[no]=2;
+	return ;
+    }
+    if (!gone[no]) gone[no]=1;
+    int ch=change(buff[step]);
+    if (child[no][ch])
+	dfs(step+1,len,th,child[no][ch]);
+    if (th) {
+	dfs(step+1,len,th-1,no);
+	for (int i=0;i<26;i++)
+	    if (child[no][i]){
+		dfs(step+1,len,th-1,child[no][i]);
+		dfs(step,len,th-1,child[no][i]);
+	    }
+    }
+}
+
+int calc(int no) {
+    int ans=0;
+    if (gone[no]==2)
+	return ways[no];
+    for (int i=0;i<26;i++)
+	if (gone[child[no][i]])
+	    ans+=calc(child[no][i]);
+    return ans;
+}
+
+void clear(int no) {
+    if (gone[no]) gone[no]=0;
+    for (int i=0;i<26;i++)
+	if (gone[child[no][i]]) clear(child[no][i]);
+}
+
+int main(){
+    int n,m,k;
+    memset(gone,0,sizeof(gone));
+    while (scanf("%d",&n)!=EOF) {
+	Trie(n);
+	scanf("%d",&m);
+	for (int i=1;i<=m;i++) {
+	    scanf("%s%d",buff,&k);
+	    dfs(0,strlen(buff),k,1);
+	    int ans=calc(1);
+	    clear(1);
+	    printf("%d\n",ans);
+	}
     }
     return 0;
 }
