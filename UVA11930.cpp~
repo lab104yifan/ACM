@@ -1,0 +1,150 @@
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int MAXNODE = 1005;
+
+struct TwoSet {
+	int n;
+	vector<int> g[MAXNODE * 2];
+	bool mark[MAXNODE * 2];
+	int S[MAXNODE * 2], sn;
+
+	void init(int tot) {
+		n = tot * 2;
+		for (int i = 0; i < n; i += 2) {
+			g[i].clear();
+			g[i^1].clear();
+		}
+		memset(mark, false, sizeof(mark));
+	}
+
+	void add_Edge(int u, int uval, int v, int vval) {
+		u = u * 2 + uval;
+		v = v * 2 + vval;
+		g[u^1].push_back(v);
+		g[v^1].push_back(u);
+	}
+
+	void delete_Edge(int u, int uval, int v, int vval) {
+		u = u * 2 + uval;
+		v = v * 2 + vval;
+		g[u^1].pop_back();
+		g[v^1].pop_back();
+	}
+
+	bool dfs(int u) {
+		if (mark[u^1]) return false;
+		if (mark[u]) return true;
+		mark[u] = true;
+		S[sn++] = u;
+		for (int i = 0; i < g[u].size(); i++) {
+			int v = g[u][i];
+			if (!dfs(v)) return false;
+		}
+		return true;
+	}
+
+	bool solve() {
+		for (int i = 0; i < n; i += 2) {
+			if (!mark[i] && !mark[i + 1]) {
+				sn = 0;
+				if (!dfs(i)){
+					for (int j = 0; j < sn; j++)
+						mark[S[j]] = false;
+					sn = 0;
+					if (!dfs(i + 1)) return false;
+				}
+			}
+		}
+		return true;
+	}
+} gao;
+
+typedef long long ll;
+const int N = 1005;
+const int INF = 0x3f3f3f3f;
+
+struct Point {
+	double x, y;
+	Point() {}
+	Point(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+	void read() {
+		cin >> x >> y;
+	}
+} p[N][2];
+
+double xmul(Point a, Point b, Point c) {
+	return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+bool judge(Point a1, Point b1, Point a2, Point b2) {
+	if (min(a1.x, b1.x) <= max(a2.x, b2.x) &&
+			min(a1.y, b1.y) <= max(a2.y, b2.y) &&
+			min(a2.x, b2.x) <= max(a1.x, b1.x) &&
+			min(a2.y, b2.y) <= max(a1.y, b1.y) && 
+			xmul(a1, a2, b1) * xmul(a1, b2, b1) <= 0 &&
+			xmul(a2, a1, b2) * xmul(a2, b1, b2) <= 0)
+		return true;
+	else
+		return false;
+}
+
+
+bool online(Point a1, Point b1, Point c) {
+	if ((ll)(a1.x - b1.x) * (a1.y - c.y) != (ll)(a1.x - c.x) * (a1.y - b1.y)) return false;
+	if (c.x < min(a1.x, b1.x)) return false;
+	if (c.x > max(a1.x, b1.x)) return false;
+	if (c.y < min(a1.y, b1.y)) return false;
+	if (c.y > max(a1.y, b1.y)) return false;
+	return true;
+}
+
+int dcmp(ll x) {
+	if (x == 0) return 0;
+	else if (x > 0) return 1;
+	else return -1;
+}
+
+bool judge(Point a1, Point b1, Point a2, Point b2) {
+	if (online(a1, b1, a2) || online(a1, b1, b2) || online(a2, b2, a1) || online(a2, b2, b1)) return true;
+	if (min(a1.x, b1.x) > max(a2.x, b2.x)) return false;
+	if (min(a1.y, b1.y) > max(a2.y, b2.y)) return false;
+	if (min(a2.x, b2.x) > max(a1.x, b1.x)) return false;
+	if (min(a2.y, b2.y) > max(a1.y, b1.y)) return false;
+	return (dcmp(xmul(a1, a2, b1)) * dcmp(xmul(a1, b1, b2)) >= 0 && dcmp(xmul(b2, a1, a2)) * dcmp(xmul(b2, a2, b1)) >= 0);
+}
+
+int n;
+
+int main() {
+	while (~scanf("%d", &n) && n) {
+		gao.init(n);
+		int x, y;
+		int l, r, u, d;
+		for (int i = 0; i < n; i++) {
+			l = d = INF; r = u = -INF;
+			for (int j = 0; j < 4; j++) {
+				scanf("%d%d", &x, &y);
+				l = min(l, x); r = max(r, x);
+				d = min(d, y); u = max(u, y);
+			}
+			rec[i] = Rec(l, r, u, d);
+			for (int j = 0; j < i; j++) {
+				for (int x = 0; x < 2; x++)
+					for (int y = 0; y < 2; y++) {
+						if (judge(rec[i].a[x], rec[i].b[x], rec[j].a[y], rec[j].b[y]))
+							gao.add_Edge(i, !x, j, !y);
+					}
+			}
+		}
+		printf("%s\n", gao.solve() ? "YES" : "NO");
+	}
+	return 0;
+}

@@ -83,14 +83,6 @@ struct SplayTree {
 		left->maintain();
 	}
 
-	int findkth(Node *o, int k, int flag) { //1 is bigth, 0 is smallth
-		if (o == null || k <= 0 || k > o->s) return 0;
-		int s = (o->ch[flag] == null ? 0 : o->ch[flag]->s);
-		if (k == s + 1) return o->v;
-		else if (k <= s) return findkth(o->ch[flag], k, flag);
-		else return findkth(o->ch[flag^1], k - s - 1, flag);
-	}
-
 	void removetree(Node* &x) {
 		if (x == NULL) return;
 		if (x->ch[0] != NULL) removetree(x->ch[0]);
@@ -98,55 +90,19 @@ struct SplayTree {
 		delete x; x = NULL;
 	}
 
+	Node* root;
+
 	void init() {
 		removetree(root);
 		null = new Node();
 	}
 
-	void build(Node* &o, int l, int r) {
-		if (l > r) {
-			o = null;
-			return;
-		}
-		int mid = (l + r) / 2;
-		o = new Node(mid);
-		build(o->ch[0], l, mid - 1);
-		build(o->ch[1], mid + 1, r);
-		o->maintain();
-	}
-
-	int n, m;
-	Node *root;
-
-	void print(Node* &o) {
-		if (o != null) {
-			o->pushdown();
-			print(o->ch[0]);
-			if (o->v >= 1)
-				printf("%d\n", o->v);
-			print(o->ch[1]);
-		}
-	}
-
 	void solve() {
 		init();
-		build(root, 0, n);
-		int a, b;
-		while (m--) {
-			scanf("%d%d", &a, &b);
-			Node *left, *mid, *right, *o;
-			split(root, a, left, o);
-			split(o, b - a + 1, mid, right);
-			mid->flip ^= 1;
-			root = merge(merge(left, right), mid);
-		}
-		print(root);
 	}
 } gao;
 
 int main() {
-	while (~scanf("%d%d", &gao.n, &gao.m)) {
-		gao.solve();
-	}
+
 	return 0;
 }

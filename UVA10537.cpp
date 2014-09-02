@@ -1,0 +1,128 @@
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <queue>
+#include <cmath>
+using namespace std;
+
+const int MAXNODE = 105;
+
+typedef long long Type;
+const Type INF = (1LL<<61);
+
+struct Edge {
+	int u, v;
+	Type dist;
+	Edge() {}
+	Edge(int u, int v, Type dist) {
+		this->u = u;
+		this->v = v;
+		this->dist = dist;
+	}
+};
+
+struct HeapNode {
+	Type d;
+	int u;
+	HeapNode() {}
+	HeapNode(Type d, int u) {
+		this->d = d;
+		this->u = u;
+	}
+	bool operator < (const HeapNode& c) const {
+		return d > c.d;
+	}
+};
+
+char to[255];
+
+struct Dijkstra {
+	int n, m;
+	vector<Edge> edges;
+	vector<int> g[MAXNODE];
+	bool done[MAXNODE];
+	Type d[MAXNODE];
+	int p[MAXNODE];
+
+	void init(int tot) {
+		n = tot;
+		for (int i = 0; i < n; i++)
+			g[i].clear();
+		edges.clear();
+	}
+
+	void add_Edge(int u, int v, Type dist) {
+		edges.push_back(Edge(u, v, dist));
+		m = edges.size();
+		g[u].push_back(m - 1);
+	}
+
+	void print(int e) {
+		if (p[e] == -1) {
+			printf("%c\n", to[e]);
+			return;
+		}
+		printf("%c-", to[e]);
+		print(edges[p[e]].u);
+	}
+
+	void dijkstra(Type start, int s) {
+		priority_queue<HeapNode> Q;
+		for (int i = 0; i < n; i++) d[i] = INF;
+		d[s] = start;
+		p[s] = -1;
+		memset(done, false, sizeof(done));
+		Q.push(HeapNode(start, s));
+		while (!Q.empty()) {
+			HeapNode x = Q.top(); Q.pop();
+			int u = x.u;
+			if (done[u]) continue;
+			done[u] = true;
+			for (int i = 0; i < g[u].size(); i++) {
+				Edge& e = edges[g[u][i]];
+				Type need;
+				if (e.dist) need = (Type)ceil(d[u] * 1.0 / 19 * 20);
+				else need = d[u] + 1;
+				if (d[e.v] > need || (d[e.v] == need && to[u] < to[edges[p[e.v]].u])) {
+					d[e.v] = need;
+					p[e.v] = g[u][i];
+					Q.push(HeapNode(d[e.v], e.v));
+				}
+			}
+		}
+	}
+} gao;
+
+typedef long long ll;
+int n, m, vis[255];
+
+int main() {
+	int cas = 0;
+	for (int i = 0; i < 26; i++) {
+		vis['A' + i] = i;
+		to[i] = 'A' + i;
+	}
+	for (int i = 0; i < 26; i++) {
+		vis['a' + i] = i + 26;
+		to[i + 26] = 'a' + i;
+	}
+	while (~scanf("%d", &m) && m != -1) {
+		gao.init(52);
+		char a[2], b[2];
+		int u, v;
+		while (m--) {
+			scanf("%s%s", a, b);
+			u = vis[a[0]], v = vis[b[0]];
+			gao.add_Edge(u, v, a[0] < 'a');
+			gao.add_Edge(v, u, b[0] < 'a');
+		}
+		ll need;
+		scanf("%lld%s%s", &need, a, b);
+		u = vis[a[0]]; v = vis[b[0]];
+		gao.dijkstra(need, v);
+		printf("Case %d:\n", ++cas);
+		printf("%lld\n", gao.d[u]);
+		gao.print(u);
+	}
+	return 0;
+}
