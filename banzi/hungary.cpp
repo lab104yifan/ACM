@@ -1,22 +1,55 @@
+#include <cstdio>
+#include <cstring>
+#include <vector>
+using namespace std;
+
+const int N = 1005;
+
+int r, c, n, left[N], right[N], S[N], T[N];
+vector<int> g[N];
+
 bool dfs(int u) {
-	for (int i = g.first[u]; i != -1; i = g.edge[i].next) {
-		int v = g.edge[i].v;
-		if (vis[v]) continue;
-		vis[v] = 1;
-		if (match[v] == -1 || dfs(match[v])) {
-			match[v] = u;
+	S[u] = 1;
+	for (int i = 0; i < g[u].size(); i++) {
+		int v = g[u][i];
+		if (T[v]) continue;
+		T[v] = 1;
+		if (!left[v] || dfs(left[v])) {
+			left[v] = u;
+			right[u] = v;
 			return true;
 		}
 	}
 	return false;
 }
 
-bool hungary() {
+int hungary() {
 	int sum = 0;
-	memset(match, -1, sizeof(match));
-	for (int i = 0; i < 2 * b; i++) {
-		memset(vis, 0, sizeof(vis));
-		if (!dfs(i)) return false;
+	memset(left, 0, sizeof(left));
+	memset(right, 0, sizeof(right));
+	for (int i = 1; i <= r; i++) {
+		memset(S, 0, sizeof(S));
+		memset(T, 0, sizeof(T));
+		if (dfs(i)) sum++;
 	}
-	return true;
+	return sum;
+}
+
+void print() {
+	memset(S, 0, sizeof(S));
+	memset(T, 0, sizeof(T));
+	for (int i = 1; i <= r; i++) {
+		if (!right[i])
+			dfs(i);
+	}
+	/*for (int i = 1; i <= r; i++)
+		if (!S[i])
+	for (int i = 1; i <= c; i++)
+		if (T[i])
+	*/
+}
+
+int main() {
+
+	return 0;
 }

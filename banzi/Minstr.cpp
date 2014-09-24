@@ -1,3 +1,4 @@
+
 int solve(char *str) {
     int i, j, l, n = strlen(str);
     i = 0; j = 1;

@@ -1,0 +1,23 @@
+#include <cstdio>
+#include <cstring>
+
+const int N = 45;
+
+int t, n, m;
+char g[N][N];
+
+int main() {
+	scanf("%d", &t);
+	while (t--) {
+		scanf("%d%d", &n, &m);
+		for (int i = 0; i < n; i++)
+			scanf("%s", g[i]);
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (g[i][j] == 'B')
+					bfs(i, j);
+			}
+		}
+	}
+	return 0;
+}

@@ -5,9 +5,10 @@
 #include <queue>
 using namespace std;
 
-typedef double Type;
+typedef int Type;
 
-const int MAXNODE = 55;
+const int MAXNODE = 505;
+const int MAXEDGE = 2777;
 
 struct Edge {
 	int u, v;
@@ -22,8 +23,9 @@ struct Edge {
 
 struct BellmanFrod {
 	int n, m;
-	vector<Edge> edges;
-	vector<int> g[MAXNODE];
+	Edge edges[MAXEDGE];
+	int first[MAXNODE];
+	int next[MAXEDGE];
 	bool inq[MAXNODE];
 	Type d[MAXNODE];
 	int p[MAXNODE];
@@ -31,14 +33,14 @@ struct BellmanFrod {
 
 	void init(int n) {
 		this->n = n;
-		for (int i = 0; i < n; i++) g[i].clear();
-		edges.clear();
+		memset(first, -1, sizeof(first));
+		m = 0;
 	}
 
 	void add_Edge(int u, int v, Type dist) {
-		edges.push_back(Edge(u, v, dist));
-		m = edges.size();
-		g[u].push_back(m - 1);
+		edges[m] = Edge(u, v, dist);
+		next[m] = first[u];
+		first[u] = m++;
 	}
 
 	bool negativeCycle() {
@@ -53,11 +55,11 @@ struct BellmanFrod {
 			int u = Q.front();
 			Q.pop();
 			inq[u] = false;
-			for (int i = 0; i < g[u].size(); i++) {
-				Edge& e = edges[g[u][i]];
+			for (int i = first[u]; i != -1; i = next[i]) {
+				Edge& e = edges[i];
 				if (d[e.v] > d[u] + e.dist) {
 					d[e.v] = d[u] + e.dist;
-					p[e.v] = g[u][i];
+					p[e.v] = i;
 					if (!inq[e.v]) {
 						Q.push(e.v);
 						inq[e.v] = true;

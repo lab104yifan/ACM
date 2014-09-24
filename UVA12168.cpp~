@@ -1,0 +1,31 @@
+#include <cstdio>
+#include <cstring>
+#include <vector>
+using namespace std;
+
+int t, n, m, tot;
+char a[105], b[105];
+
+int main() {
+	scanf("%d", &t);
+	while (t--) {
+		scanf("%d%d%d", &n, &m, &tot);
+		for (int i = 1; i <= n; i++)
+			g[i].clear();
+		while (tot--) {
+			scanf("%s%s", a, b);
+			int aa, bb;
+			if (a[0] == 'C') {
+				sscanf(a + 1, "%d", aa);
+				sscanf(b + 1, "%d", bb);
+				g[aa].push_back(bb);
+			} else {
+				sscanf(a + 1, "%d", aa);
+				sscanf(b + 1, "%d", bb);
+				g[bb].push_back(aa);
+			}
+		}
+		printf("%d\n", n - hungary());
+	}
+	return 0;
+}

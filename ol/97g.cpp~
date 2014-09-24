@@ -1,0 +1,154 @@
+#include <cstdio>
+#include <cstring>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+typedef unsigned long long ll;
+
+int t;
+
+int tmpg[10][10];
+
+ll rotate(ll x) {
+	for (int i = 7; i >= 0; i--) {
+		for (int j = 7; j >= 0; j--) {
+			if (x % 2) tmpg[i][j] = 1;
+			else tmpg[i][j] = 0;
+			x /= 2;
+		}
+	}
+	ll ans = 0;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			ans = ans * 2 + tmpg[7 - j][i];
+		}
+	}
+	return ans;
+}
+
+struct Puzz {
+	ll s[4];
+	int u;
+	void init(char str[][10]) {
+		u = 0;
+		s[0] = 0;
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				s[0] = s[0] * 2;
+				if (str[i][j] == '#')
+					s[0]++;
+			}
+		}
+		for (int i = 1; i < 4; i++)
+			s[i] = rotate(s[i - 1]);
+	}
+};
+
+char str[3][3][10][10];
+
+struct State {
+	Puzz p[10];
+	void init() {
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++) {
+				p[i * 3 + j].init(str[i][j]);
+			}
+	}
+	int hash() {
+		int ans = 0;
+		for (int i = 0; i < 9; i++)
+			ans = ans * 4 + p[i].u;
+		return ans;
+	}
+
+	bool operator == (const State& c) const {
+		for (int i = 0; i < 9; i++)
+			if (p[i].s[p[i].u] != c.p[i].s[c.p[i].u])
+				return false;
+		return true;
+	}
+} s, e;
+
+int chi[9][4];
+
+void init() {
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 8; j++) {
+			for (int k = 0; k < 3; k++) {
+				scanf("%s", str[i][k][j]);
+			}
+		}
+	}
+	s.init();
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 8; j++) {
+			for (int k = 0; k < 3; k++) {
+				scanf("%s", str[i][k][j]);
+			}
+		}
+	}
+	e.init();
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 4; j++) {
+			scanf("%d", &chi[i][j]);
+		}
+	}
+}
+
+const int INF = 0x3f3f3f3f;
+int vis[300005];
+const int d[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
+
+State v;
+int vv[10];
+
+void dfs(int now, int rot) {
+	vv[now] = 1;
+	for (int i = 0; i < 4; i++) {
+		int x = now / 3 + d[i][0];
+		int y = now % 3 + d[i][1];
+		if (x < 0 || x >= 3 || y < 0 || y >= 3) continue;
+		int next = x * 3 + y;
+		if (vv[next]) continue;
+		if (chi[now][(v.p[now].u + i) % 4] == 0) continue;
+		dfs(next, !rot);
+		if (rot == 0)
+			v.p[now].u = (v.p[now].u + 1) % 4;
+		else
+			v.p[now].u = (v.p[now].u - 1 + 4) % 4;
+	}
+}
+
+int bfs() {
+	queue<State> Q;
+	memset(vis, INF, sizeof(vis));
+	Q.push(s);
+	vis[0] = 0;
+	while (!Q.empty()) {
+		State u = Q.front();
+		if (u == e)
+			return vis[u.hash()];
+		Q.pop();
+		for (int j = 0; j < 9; j++) {
+			v = u;
+			memset(vv, 0, sizeof(vv));
+			dfs(j, 0);
+			int vh = v.hash(), uh = u.hash();
+			if (vh > uh) {
+				vis[vh] = vis[uh] + 1;
+				Q.push(v);
+			}
+		}
+	}
+	return -1;
+}
+
+int main() {
+	scanf("%d", &t);
+	while (t--) {
+		init();
+		printf("%d\n", bfs());
+	}
+	return 0;
+}

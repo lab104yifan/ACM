@@ -1,0 +1,9 @@
+#include <cstdio>
+#include <cstring>
+
+int t, n, m, c;
+
+int main() {
+
+	return 0;
+}

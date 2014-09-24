@@ -4,11 +4,11 @@
 #include <queue>
 using namespace std;
 
-#define INF 0x3f3f3f3f3f3f3f
-
 const int MAXNODE = 505;
+const int MAXEDGE = 5005;
 
-typedef long long Type;
+typedef int Type;
+const Type INF = 0x3f3f3f3f;
 
 struct Edge {
 	int u, v;
@@ -36,23 +36,23 @@ struct HeapNode {
 
 struct Dijkstra {
 	int n, m;
-	vector<Edge> edges;
-	vector<int> g[MAXNODE];
+	Edge edges[MAXEDGE];
+	int first[MAXNODE];
+	int next[MAXEDGE];
 	bool done[MAXNODE];
 	Type d[MAXNODE];
 	int p[MAXNODE];
 
-	void init(int tot) {
-		n = tot;
-		for (int i = 0; i < n; i++)
-			g[i].clear();
-		edges.clear();
+	void init(int n) {
+		this->n = n;
+		memset(first, -1, sizeof(first));
+		m = 0;
 	}
 
 	void add_Edge(int u, int v, Type dist) {
-		edges.push_back(Edge(u, v, dist));
-		m = edges.size();
-		g[u].push_back(m - 1);
+		edges[m] = Edge(u, v, dist);
+		next[m] = first[u];
+		first[u] = m++;
 	}
 
 	void print(int e) {//shun xu
@@ -85,11 +85,11 @@ struct Dijkstra {
 			int u = x.u;
 			if (done[u]) continue;
 			done[u] = true;
-			for (int i = 0; i < g[u].size(); i++) {
-				Edge& e = edges[g[u][i]];
+			for (int i = first[u]; i != -1; i = next[i]) {
+				Edge& e = edges[i];
 				if (d[e.v] > d[u] + e.dist) {
 					d[e.v] = d[u] + e.dist;
-					p[e.v] = g[u][i];
+					p[e.v] = i;
 					Q.push(HeapNode(d[e.v], e.v));
 				}
 			}

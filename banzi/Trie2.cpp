@@ -31,4 +31,4 @@ struct Trie {
 	}
 	val[u] = v;
     }
-} gao;
+};
